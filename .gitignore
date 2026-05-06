@@ -1,0 +1,51 @@
+# ProXtal-LM .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Training outputs
+checkpoints/
+*.pt
+*.pth
+*.csv
+logs/
+runs/
+wandb/
+
+# Data (large files)
+*.h5
+*.hdf5
+data/
+*.npy
+*.npz
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# Instructions (contains development notes, not for version control)
+.github/instructions/
+*.instructions.md

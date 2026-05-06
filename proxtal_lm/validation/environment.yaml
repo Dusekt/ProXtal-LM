@@ -1,0 +1,35 @@
+# ProXtal-LM Validation Environment
+# ===================================
+# Extra dependencies for the validation subpackage.
+# These are NOT required by the core proxtal_lm package.
+#
+# Create the environment:
+#   conda env create -f proxtal_lm/validation/environment.yaml
+#   conda activate proxtal-lm-validation
+#
+# Or install into an existing env:
+#   conda env update -f proxtal_lm/validation/environment.yaml
+
+name: proxtal-lm-validation
+channels:
+  - conda-forge
+  - pytorch
+  - defaults
+dependencies:
+  - python>=3.10
+  - pip
+
+  # Core (shared with main package)
+  - pytorch>=2.0
+  - numpy>=1.24
+  - scipy>=1.10
+
+  # Crystallography
+  - gemmi>=0.6
+
+  # Atomic Simulation Environment
+  - ase>=3.22
+
+  # MLIP (via pip — not on conda-forge)
+  - pip:
+    - mace-torch>=0.3
