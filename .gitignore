@@ -15,7 +15,6 @@ build/
 *.ipynb_checkpoints
 
 # Training outputs
-checkpoints/
 *.pt
 *.pth
 *.csv
@@ -49,3 +48,19 @@ temp/
 # Instructions (contains development notes, not for version control)
 .github/instructions/
 *.instructions.md
+
+.ipynb*
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints 
+.github/
+

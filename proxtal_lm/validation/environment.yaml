@@ -1,14 +1,5 @@
 # ProXtal-LM Validation Environment
 # ===================================
-# Extra dependencies for the validation subpackage.
-# These are NOT required by the core proxtal_lm package.
-#
-# Create the environment:
-#   conda env create -f proxtal_lm/validation/environment.yaml
-#   conda activate proxtal-lm-validation
-#
-# Or install into an existing env:
-#   conda env update -f proxtal_lm/validation/environment.yaml
 
 name: proxtal-lm-validation
 channels:

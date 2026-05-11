@@ -1,0 +1,6 @@
+*.gz filter=lfs diff=lfs merge=lfs -text
+data/test_data_3d_esmc.gz filter=lfs diff=lfs merge=lfs -text
+data/train_data_3d_esmc.gz filter=lfs diff=lfs merge=lfs -text
+data/valid_data_3d_esmc.gz filter=lfs diff=lfs merge=lfs -text
+checkpoints/*.gz filter=lfs diff=lfs merge=lfs -text
+checkpoints/model_esmc_large/latest_checkpoint.pt.gz filter=lfs diff=lfs merge=lfs -text

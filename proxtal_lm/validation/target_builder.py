@@ -294,15 +294,15 @@ def process_protein(mmcif_file: str, output_mat: str) -> None:
     np.save(f"{output_mat}_indices_C.npy", Ctargets)
 
 
-def process_esmfold_protein(pdb_file: str, output_mat: str) -> None:
+def process_predicted_protein(pdb_file: str, output_mat: str) -> None:
     """
-    Build distogram targets from an ESMFold PDB file (no crystal info).
+    Build distogram targets from a predicted PDB file (no crystal info).
 
     Saves:
         ``{output_mat}_indices.npy`` — distogram targets (L, L, S)
     """
     if not GEMMI_AVAILABLE:
-        raise ImportError("gemmi is required for process_esmfold_protein")
+        raise ImportError("gemmi is required for process_predicted_protein")
 
     smoother = CrystalTargetSmoother()
     structure = gemmi.read_structure(pdb_file)

@@ -146,7 +146,8 @@ def get_chain_id(n):
     return result
 
 def build_crystal_and_squeeze(pdb_path, sg_name, target_vm=2.5):
-    """Squeezes the cell to biological density and mathematically clones the symmetry mates."""
+    """Squeezes the cell to biological density using rigid-body translations."""
+    import math 
     
     # 1. Auto-Calculate exact Molecular Weight
     temp_atoms = ase_read(pdb_path)
@@ -157,15 +158,16 @@ def build_crystal_and_squeeze(pdb_path, sg_name, target_vm=2.5):
     sg = gemmi.SpaceGroup(sg_name)
     cell = st.cell
     
-    # 2. The Squeeze
+    # 2. The Squeeze (Calculate target parameters)
     current_vol = cell.volume
     z_value = len(list(sg.operations()))
     target_vol = target_vm * exact_mw * z_value
     scale = (target_vol / current_vol) ** (1/3)
     
-    new_cell = gemmi.UnitCell(cell.a * scale, cell.b * scale, cell.c * scale, cell.alpha, cell.beta, cell.gamma)
+    new_cell = gemmi.UnitCell(cell.a * scale, cell.b * scale, cell.c * scale, 
+                              cell.alpha, cell.beta, cell.gamma)
     
-    # 3. The Cloning Machine (Fixed for whole-chain integrity)
+    # 3. The Rigid Body Cloning Machine 
     new_st = gemmi.Structure()
     new_model = gemmi.Model("1") 
     
@@ -176,36 +178,73 @@ def build_crystal_and_squeeze(pdb_path, sg_name, target_vm=2.5):
             new_chain.name = get_chain_id(chain_counter + 1)
             chain_counter += 1
             
-            # --- THE FIX: Corrected gemmi indexing ---
-            # original_chain[0] is the first residue, [0][0] is the first atom
-            anchor_pos = original_chain[0][0].pos
-            anchor_frac = cell.fractionalize(anchor_pos)
-            anchor_sym_frac = op.apply_to_xyz(anchor_frac.tolist())
-            
-            # Find out how many periodic boxes away the anchor ended up
-            # (using integer floor division)
-            shift_x = int(anchor_sym_frac[0] // 1)
-            shift_y = int(anchor_sym_frac[1] // 1)
-            shift_z = int(anchor_sym_frac[2] // 1)
-            
-            for res in new_chain:
+            # A. Calculate the Center of Geometry of the original chain
+            sum_x = sum_y = sum_z = 0.0
+            n_atoms = 0
+            for res in original_chain:
                 for atom in res:
-                    frac = cell.fractionalize(atom.pos)
-                    sym_frac = op.apply_to_xyz(frac.tolist())
-                    
-                    # Shift the whole molecule back by the same amount!
-                    # This keeps all bonds perfectly intact.
-                    sym_frac[0] -= shift_x
-                    sym_frac[1] -= shift_y
-                    sym_frac[2] -= shift_z
-                    
-                    new_pos = new_cell.orthogonalize(gemmi.Fractional(*sym_frac))
-                    atom.pos = gemmi.Position(*new_pos)
-            # ---------------------------------------------------------------------
+                    sum_x += atom.pos.x
+                    sum_y += atom.pos.y
+                    sum_z += atom.pos.z
+                    n_atoms += 1
+            com_orig = gemmi.Position(sum_x/n_atoms, sum_y/n_atoms, sum_z/n_atoms)
+
+            # B. Apply symmetry to the Center of Geometry in the OLD cell
+            com_frac_old = cell.fractionalize(com_orig)
+            raw_sym_com_frac = op.apply_to_xyz(com_frac_old.tolist())
+
+            # C. Find integer shifts to wrap the molecule into the primary unit cell [0, 1)
+            shift_x = -math.floor(raw_sym_com_frac[0])
+            shift_y = -math.floor(raw_sym_com_frac[1])
+            shift_z = -math.floor(raw_sym_com_frac[2])
+
+            sym_com_frac = [
+                raw_sym_com_frac[0] + shift_x,
+                raw_sym_com_frac[1] + shift_y,
+                raw_sym_com_frac[2] + shift_z
+            ]
+
+            # D. Get Cartesian position of this anchor in OLD and NEW cells
+            sym_com_cart_old = cell.orthogonalize(gemmi.Fractional(*sym_com_frac))
+            
+            # This is where the actual "squeeze" happens—moving the anchor point!
+            sym_com_cart_new = gemmi.Position(
+                sym_com_cart_old.x * scale,
+                sym_com_cart_old.y * scale,
+                sym_com_cart_old.z * scale
+            )
+
+            # E. Reconstruct the molecule rigidly around the new anchor
+            # Zipping allows us to read original coordinates and write directly to the clone
+            for orig_res, new_res in zip(original_chain, new_chain):
+                for orig_atom, new_atom in zip(orig_res, new_res):
+                    frac = cell.fractionalize(orig_atom.pos)
+                    raw_sym_frac = op.apply_to_xyz(frac.tolist())
+
+                    # Apply the EXACT SAME integer shifts as the anchor to keep bonds perfectly contiguous 
+                    shifted_sym_frac = [
+                        raw_sym_frac[0] + shift_x,
+                        raw_sym_frac[1] + shift_y,
+                        raw_sym_frac[2] + shift_z
+                    ]
+
+                    # Get un-crushed, properly rotated Cartesian position in the old cell
+                    sym_cart_old = cell.orthogonalize(gemmi.Fractional(*shifted_sym_frac))
+
+                    # Calculate relative Cartesian vector from the un-crushed Center of Geometry
+                    dx = sym_cart_old.x - sym_com_cart_old.x
+                    dy = sym_cart_old.y - sym_com_cart_old.y
+                    dz = sym_cart_old.z - sym_com_cart_old.z
+
+                    # Place rigidly in the new squeezed cell, maintaining perfect covalent bonds
+                    new_atom.pos = gemmi.Position(
+                        sym_com_cart_new.x + dx,
+                        sym_com_cart_new.y + dy,
+                        sym_com_cart_new.z + dz
+                    )
             
             new_model.add_chain(new_chain)
             
-    # NOW we add the fully-loaded model to the structure
     new_st.add_model(new_model)
     new_st.cell = new_cell
     new_st.spacegroup_hm = sg_name
