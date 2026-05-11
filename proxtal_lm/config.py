@@ -3,9 +3,7 @@ Configuration management for ProXtal-LM training.
 
 Provides dataclass-based configuration with preset profiles:
 - default:   Baseline with recycling disabled
-- small:     Quick testing on small GPU
-- large:     High-capacity model  
-- optimized: Speed + memory optimised with recycling
+- large:     Default architecture with ESMC data  
 """
 
 import os

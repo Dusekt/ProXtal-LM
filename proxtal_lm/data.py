@@ -17,6 +17,8 @@ Optional Fields
 ---------------
 The dataset gracefully handles h5 files that lack ``chain_id`` or
 ``space_group`` data — they will simply be absent from the returned dict.
+
+These were currently not used for training, but are included for potential future use in chain-aware masking
 """
 
 import math

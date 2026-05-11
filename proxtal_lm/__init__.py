@@ -1,7 +1,7 @@
 """
-ProXtal-LM — Protein Crystal Language Model (V2)
+ProXtal-LM — Protein Crystal Language Model
 
-A deep learning framework for predicting crystal distograms from ESM-2
+A deep learning framework for predicting crystal distograms from ESMC
 protein embeddings, featuring pair-biased attention, chain-aware masking,
 memory-safe recycling, and windowed axial attention.
 """

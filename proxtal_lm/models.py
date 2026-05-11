@@ -3,7 +3,7 @@ Neural network architectures for crystal distogram prediction.
 
 V2 Architecture features:
 - Pair-biased self-attention in the sequence encoder (Evoformer-style)
-- Relative positional encoding with chain-awareness for multi-chain crystals
+- Relative positional encoding with chain-awareness for multi-chain crystals (unused)
 - Space group embedding injected into sequence representation
 - Memory-safe recycling loop with detached intermediate representations
 - Windowed axial attention for memory efficiency with long multi-chain sequences
