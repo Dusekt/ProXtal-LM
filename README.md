@@ -7,7 +7,7 @@ A deep learning framework for predicting protein crystallization outcomes using 
 ProXtal-LM predicts inter-residue distances in protein structures by:
 1. Taking ESMC-300M protein embeddings as input
 2. Processing them through a triangular attention network
-3. Predicting distance binswhere each protein has multiple possible crystallization outcomes
+3. Predicting distance bins where each protein has multiple possible crystallization outcomes
 
 The model architecture combines:
 - **Sequence Encoder**: Transformer layers to process ESM2 embeddings
